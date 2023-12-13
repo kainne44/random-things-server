@@ -30,26 +30,26 @@ fn main() {
     // OR they may select "dice", passing the qty of dice and sides
 
     // let input = Input::Number(NumParams { size: 6 });
-    let input = Input::Dice(DiceParams { qty: 2, sides: 6 });
+    let input = Input::Dice(DiceParams { qty: 2, sides: 20 });
     // let input = Input::Password(NumParams { size: 12 });
 
-    let mut num_output: Vec<usize> = Vec::new();
-    let str_output: String;
+    let mut str_output: Vec<String> = Vec::new();
     match input {
         Input::Number(input) => {
-            num_output = vec!(rng_by_size(input.size));
+            str_output = vec!(rng_by_size(input.size));
         }
         Input::Dice(input) => {
-            num_output = dice_roll(input.qty, input.sides);
+            str_output = dice_roll(input.qty, input.sides);
         }
         Input::Password(input) => {
-            str_output = rand_pwd(input.size);
+            str_output = vec!(rand_pwd(input.size));
         }
     }
+    dbg!(str_output);
 }
 
 // *FUNCTION* returns a random number num_len digits long
-fn rng_by_size(num_len: usize) -> usize {
+fn rng_by_size(num_len: usize) -> String {
     let mut rng = rand::thread_rng();
 
     // you need to have a vector to concat to
@@ -60,17 +60,17 @@ fn rng_by_size(num_len: usize) -> usize {
         let random_num: usize = rng.gen_range(0..10);
         num_str_vec.push(random_num.to_string());
     }
-    let random_num: usize = num_str_vec.join("").parse().unwrap();
+    let random_num: String = num_str_vec.join("").to_string();
     return random_num;
 }
 
 // *FUNCTION* returns a vector of values from 1 to n, where n is sides of die
-fn dice_roll(qty: usize, sides: usize) -> Vec<usize> {
+fn dice_roll(qty: usize, sides: usize) -> Vec<String> {
     let mut rng = rand::thread_rng();
-    let mut dice_vec: Vec<usize> = Vec::new();
-    for die in 1..=qty {
+    let mut dice_vec: Vec<String> = Vec::new();
+    for _die in 1..=qty {
         let roll: usize = rng.gen_range(1..=sides);
-        dice_vec.push(roll);
+        dice_vec.push(roll.to_string());
     }
     dice_vec
 }
