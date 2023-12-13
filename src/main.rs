@@ -14,14 +14,14 @@ struct DiceParams {
     sides: usize,
 }
 
-enum RandomType {
+enum Input {
     Number(NumParams),
     Dice(DiceParams),
     Password(NumParams),
 }
 
 fn main() {
-    // TODO: Add web server functionality w/ axum
+    // TODO: Add web server functionality
     // TODO: Allow user to pass the selections as inputs
     //
     // For example, a user may select "random number" and pick 16 to generate
@@ -29,18 +29,23 @@ fn main() {
     // OR they may select "password" and pick 12 to generate a 12 letter random pw
     // OR they may select "dice", passing the qty of dice and sides
 
-    let input_number = RandomType::Number(NumParams { size: 6 });
-    let input_dice = RandomType::Dice(DiceParams { qty: 2, sides: 6 });
-    let input_password = RandomType::Password(NumParams { size: 12 });
+    // let input = Input::Number(NumParams { size: 6 });
+    let input = Input::Dice(DiceParams { qty: 2, sides: 6 });
+    // let input = Input::Password(NumParams { size: 12 });
 
-    // size of concatenated random number -- TODO: input from user
-    let num_len: usize = 10;
-    let number = rng_by_size(num_len);
-    dbg!(number);
-
-    // need random dice roll, lets you choose qty of sides and qty of dice
-
-    // need random password, lets you choose length of password
+    let mut num_output: Vec<usize> = Vec::new();
+    let str_output: String;
+    match input {
+        Input::Number(input) => {
+            num_output = vec!(rng_by_size(input.size));
+        }
+        Input::Dice(input) => {
+            num_output = dice_roll(input.qty, input.sides);
+        }
+        Input::Password(input) => {
+            str_output = rand_pwd(input.size);
+        }
+    }
 }
 
 // *FUNCTION* returns a random number num_len digits long
@@ -57,4 +62,22 @@ fn rng_by_size(num_len: usize) -> usize {
     }
     let random_num: usize = num_str_vec.join("").parse().unwrap();
     return random_num;
+}
+
+// *FUNCTION* returns a vector of values from 1 to n, where n is sides of die
+fn dice_roll(qty: usize, sides: usize) -> Vec<usize> {
+    let mut rng = rand::thread_rng();
+    let mut dice_vec: Vec<usize> = Vec::new();
+    for die in 1..=qty {
+        let roll: usize = rng.gen_range(1..=sides);
+        dice_vec.push(roll);
+    }
+    dice_vec
+}
+
+// *FUNCTION* returns a string of random chars of n length
+// TODO: Finish this function
+fn rand_pwd(size: usize) -> String {
+    let pwd = "pwd".to_string();
+    return pwd;
 }
