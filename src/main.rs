@@ -2,53 +2,84 @@
  * The idea is to be able to generate random numbers, passwords,
  * and dice rolls based on the request from a client*/
 
-use color_eyre::eyre::Result;
+use actix_web::{get, post, web::{self, Json}, App, HttpResponse, HttpServer, Responder, HttpRequest};
 use rand::Rng;
+use serde::Deserialize;
 
+#[allow(dead_code)]
 struct NumParams {
     size: usize,
 }
 
+#[allow(dead_code)]
 struct DiceParams {
     qty: usize,
     sides: usize,
 }
 
+#[allow(dead_code)]
 enum Input {
     Number(NumParams),
     Dice(DiceParams),
     Password(NumParams),
 }
 
-fn main() {
-    // TODO: Add web server functionality
-    // TODO: Allow user to pass the selections as inputs
-    //
-    // For example, a user may select "random number" and pick 16 to generate
-    // a 16 digit random number.
-    // OR they may select "password" and pick 12 to generate a 12 letter random pw
-    // OR they may select "dice", passing the qty of dice and sides
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello World")
+}
+
+#[derive(Deserialize)]
+struct Info {
+    username: String,
+}
+
+#[post("/echo")]
+async fn echo(info: web::Json<Info>) -> impl Responder {
+    HttpResponse::Ok().body(info.username.clone())
+}
+
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    // TODO: Web Server Functionality
+    // Need to add new routes
+    HttpServer::new(|| {
+        App::new().service(hello).service(echo).route("/hey", web::get().to(manual_hello))
+    }).bind(("127.0.0.1", 8080))?.run().await
+
+
+    
+    //TODO: Parse Requests and conform input to what the BL can accept
+    // All of the logic has to go in the implementation function for the
+    // http request
+
+    // Business Logic - Generating random things
 
     // let input = Input::Number(NumParams { size: 6 });
-    let input = Input::Dice(DiceParams { qty: 2, sides: 20 });
+    // let input = Input::Dice(DiceParams { qty: 2, sides: 20 });
     // let input = Input::Password(NumParams { size: 12 });
-
-    let mut str_output: Vec<String> = Vec::new();
-    match input {
-        Input::Number(input) => {
-            str_output = vec!(rng_by_size(input.size));
-        }
-        Input::Dice(input) => {
-            str_output = dice_roll(input.qty, input.sides);
-        }
-        Input::Password(input) => {
-            str_output = vec!(rand_pwd(input.size));
-        }
-    }
-    dbg!(str_output);
+    //
+    // let str_output: Vec<String>;
+    // match input {
+    //     Input::Number(input) => {
+    //         str_output = vec![rng_by_size(input.size)];
+    //     }
+    //     Input::Dice(input) => {
+    //         str_output = dice_roll(input.qty, input.sides);
+    //     }
+    //     Input::Password(input) => {
+    //         str_output = vec![rand_pwd(input.size)];
+    //     }
+    // }
+    // dbg!(str_output);
 }
 
 // *FUNCTION* returns a random number num_len digits long
+#[allow(dead_code)]
 fn rng_by_size(num_len: usize) -> String {
     let mut rng = rand::thread_rng();
 
@@ -65,6 +96,7 @@ fn rng_by_size(num_len: usize) -> String {
 }
 
 // *FUNCTION* returns a vector of values from 1 to n, where n is sides of die
+#[allow(dead_code)]
 fn dice_roll(qty: usize, sides: usize) -> Vec<String> {
     let mut rng = rand::thread_rng();
     let mut dice_vec: Vec<String> = Vec::new();
@@ -76,8 +108,18 @@ fn dice_roll(qty: usize, sides: usize) -> Vec<String> {
 }
 
 // *FUNCTION* returns a string of random chars of n length
-// TODO: Finish this function
+// I got this algorithm from the "Rust Cookbook"
+#[allow(dead_code)]
 fn rand_pwd(size: usize) -> String {
-    let pwd = "pwd".to_string();
-    return pwd;
+    const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+                            abcdefghijklmnopqrstuvwxyz\
+                            0123456789*&^%$#@!~";
+    let mut rng = rand::thread_rng();
+    let password: String = (0..size)
+        .map(|_| {
+            let idx = rng.gen_range(0..CHARSET.len());
+            CHARSET[idx] as char
+        })
+        .collect();
+    return password;
 }
